@@ -7,6 +7,8 @@ use App\Book;
 use App\Http\Requests\StoreBookPost;
 use App\Http\Requests\UpdateBookPost;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class BookController extends Controller
 {
@@ -44,6 +46,18 @@ class BookController extends Controller
         $author = $user->author;
 
         $data['author_id'] = $author->id;
+
+
+        # Image-part
+        $image = $request->image;  // your base64 encoded
+        $image = str_replace('data:image/png;base64,', '', $image);
+        $image = str_replace(' ', '+', $image);
+        $imageName = Str::random(10).'.'.'png';
+
+        Storage::disk('public')->put($imageName, base64_decode($image));
+        # End-image-part
+
+        $data['image'] = url('uploads/' . $imageName);
         $book = Book::create($data);
 
         return response()->json($book, 201);
@@ -69,7 +83,22 @@ class BookController extends Controller
      */
     public function update(UpdateBookPost $request, Book $book_id)
     {
-        $book_id->update($request->only(['title', 'pages', 'annotation', 'image']));
+        $data = $request->only(['title', 'pages', 'annotation', 'image']);
+
+        # Image-part
+        if($request->has('image')) {
+            $image = $request->image;
+            $image = str_replace('data:image/png;base64,', '', $image);
+            $image = str_replace(' ', '+', $image);
+            $imageName = Str::random(10).'.'.'png';
+
+            Storage::disk('public')->put($imageName, base64_decode($image));
+            $data['image'] = url('uploads/' . $imageName);
+        }
+        # End-image-part
+        # --------------------------
+
+        $book_id->update($data);
         return response()->json($book_id, 200);
     }
 
