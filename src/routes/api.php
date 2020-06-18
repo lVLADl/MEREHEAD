@@ -14,9 +14,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('register', 'AuthController@register');
-Route::post('login', 'AuthController@authenticate');
+Route::get('authors/' /*TODO*/);
 
-Route::group(['middleware' => ['jwt.verify']], function() {
-    Route::get('user', 'AuthController@getAuthenticatedUser');
+Route::get('books/' /*TODO*/);
+Route::get('books/{author}' /*TODO*/);
+
+Route::middleware(['jwt.verify'])->prefix('')->group(function() {
+
+});
+
+Route::prefix('auth')->group(function() {
+    Route::post('register/', 'AuthController@register');
+    Route::post('login/', 'AuthController@authenticate');
+
+    Route::group(['middleware' => ['jwt.verify']], function() {
+        Route::get('user/', 'AuthController@getAuthenticatedUser');
+    });
 });
