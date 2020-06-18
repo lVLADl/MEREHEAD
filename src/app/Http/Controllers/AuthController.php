@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Author;
+use App\Http\Requests\RegisterUserAuthorPost;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Validation\Validator, Illuminate\Support\Facades\Hash;
@@ -27,21 +28,8 @@ class AuthController extends Controller
         return response()->json(compact('token'));
     }
 
-    public function register(Request $request)
+    public function register(RegisterUserAuthorPost $request)
     {
-        /*TODO*/
-        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|',#confirmed',
-            'first_name' => 'required|string',
-            'second_name' => 'required|string'
-        ]);
-
-        if($validator->fails()){
-            return response()->json($validator->errors()->toJson(), 400);
-        }
-
         $user = User::create([
             'name' => $request->get('name'),
             'email' => $request->get('email'),
