@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Author;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Validation\Validator, Illuminate\Support\Facades\Hash;
@@ -28,10 +29,13 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        /*TODO*/
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|'#confirmed',
+            'password' => 'required|string|min:6|',#confirmed',
+            'first_name' => 'required|string',
+            'second_name' => 'required|string'
         ]);
 
         if($validator->fails()){
@@ -44,6 +48,13 @@ class AuthController extends Controller
             'password' => Hash::make($request->get('password')),
         ]);
 
+        Author::create([
+            'first_name' => $request->get('first_name'),
+            'second_name' => $request->get('second_name'),
+            'user_id' => $user->id
+        ]);
+
+
         $token = JWTAuth::fromUser($user);
 
         return response()->json(compact('user','token'),201);
@@ -52,22 +63,17 @@ class AuthController extends Controller
     public function getAuthenticatedUser()
     {
         try {
-
             if (! $user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['user_not_found'], 404);
             }
-
         } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-
             return response()->json(['token_expired'], $e->getStatusCode());
-
         } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
             return response()->json(['token_invalid'], $e->getStatusCode());
-
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
             return response()->json(['token_absent'], $e->getStatusCode());
-
         }
+
         return response()->json(compact('user'));
     }
 }
