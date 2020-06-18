@@ -15,21 +15,27 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 |
 */
 
+Route::get('test/', function(Request $request) {
+    $user = \Illuminate\Support\Facades\Auth::user();
+    return $user->author;
+});
+
+
 Route::get('authors/', 'AuthorController@index');
 
 Route::get('books/', 'BookController@index');
-Route::get('books/{author}', 'BookController@author_books');
+Route::get('books/by_author/{author}/', 'BookController@author_books');
+Route::get('books/{book_id}/', 'BookController@show');
 
-
+Route::get('my_books/', 'BookController@get_auth_user_books')->middleware(['jwt.verify']);
 
 Route::group(['middleware' => ['jwt.verify'], 'prefix' => 'books'], function() {
-    # TODO Route::get('user_books/', );
-    Route::post('create/', 'BookController@store');
+    Route::post('', 'BookController@store');
 
-    /* Route::get('hux/', function(Request $request) {
-            return $user = JWTAuth::parseToken()->authenticate();
-        return response()->json(\Illuminate\Support\Facades\Auth::user());
-    }); */
+    Route::group(['middleware' => ['check_book_rights']], function() {
+        Route::put('{book_id}/', 'BookController@update');
+        Route::delete('{book_id}/', 'BookController@destroy');
+    });
 });
 
 Route::prefix('auth')->group(function() {

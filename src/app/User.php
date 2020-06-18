@@ -48,4 +48,11 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->getKey();
     }
+
+
+    # Relations
+    public function author()
+    {
+        return $this->hasOne(Author::class);
+    }
 }
